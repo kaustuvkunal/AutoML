@@ -64,7 +64,7 @@ Update your  kaggle id under id (in line 17) of kaggle_bot.py and provide/update
 
 ## Future work 
 - Automate Deep learning models e.g. image processing
-- NLP i.e support for text features
+- NLP i.e. support for text features
 - Optimization 
 
 ## References :
