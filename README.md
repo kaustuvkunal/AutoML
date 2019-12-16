@@ -44,14 +44,14 @@ Usage Instruction :
 
 Update your  kaggle id under id (in line 17) of kaggle_bot.py and provide/update following configuration parameter inside automl_bot_kaggle_kernel/runconfig.py and execute
 
-"_COMPETITION" >  Kaggle competition name
-"_TARGET_COL" ->  Feature to be predicted
-"_ID_COL" -> Unique id column or column which will exist inside final submission file
-"_NAME" -> Name of kaggle kernel  the bot is generating 
-"_METRIC" ->  evaluation metric
-"_TYPE" ->  Learning type either regression  or classification
-"_TEST_FILE" ->  Test File name ( if other than test)
-"_TRAIN_FILE" -> Training file name ( if other than train)
+- "_COMPETITION" >  Kaggle competition name
+- "_TARGET_COL" ->  Feature to be predicted
+- "_ID_COL" -> Unique id column or column which will exist inside final submission file
+- "_NAME" -> Name of kaggle kernel  the bot is generating 
+- "_METRIC" ->  evaluation metric
+- "_TYPE" ->  Learning type either regression  or classification
+- "_TEST_FILE" ->  Test File name ( if other than test)
+- "_TRAIN_FILE" -> Training file name ( if other than train)
 
 
              
