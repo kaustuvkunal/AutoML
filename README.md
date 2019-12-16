@@ -20,8 +20,7 @@ Our bot auto generates notebook code for these phases for provided problem data 
 - Provides Model-Leaderboard for model evaluation 
 - Covers wide range of Models ( trains data  on total 13 model that includes  5 base models,  2 bagging models, 3 boosting models,  2 voting and  1 stacking model). 
 - Automates all generic steps hence saves Time  
-- Guide in further modeling decisions
-- 
+- Guides in further modeling decisions
 
 ## Project Modules 
 
