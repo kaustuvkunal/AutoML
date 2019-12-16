@@ -1,0 +1,824 @@
+<text>
+## 5. Data Modelling
+
+Lets create Data models.
+First we will define few useful functions
+
+</text>
+
+
+
+<text>
+##### Function to evalute model
+</text>
+
+
+<code>
+
+metric = "<_METRIC>"
+def model_evaluate(model, metric=metric ):
+    mesure = cross_val_score(model,train_df, y, cv=3, scoring=metric )
+    mesure_mean = mesure.mean()
+    print("3 Fold Cross-Validation " +metric+" measure is : " +str(mesure_mean))
+    return  mesure_mean
+    
+</code>
+
+<text>
+#####  Function to plot auc curve 
+</text>
+
+<code>
+def generate_auc(y_valid, valp, model_name):
+    auc_scr = roc_auc_score(y_valid, valp)
+    print('The AUC for ' +model_name+ ' is :', auc_scr)
+
+    fpr, tpr, thresholds = roc_curve(y_valid, valp)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure(figsize=(6,5))
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(fpr, tpr, 'purple', label = 'AUC = %0.2f' % roc_auc)
+    plt.legend(loc = 'upper left')
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
+    
+</code>
+
+<text>
+##### Function to plot Confusion Matrix 
+</text>
+
+<code>
+def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    plt.figure(figsize=(6,5));
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+    plt.grid(False)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt), horizontalalignment="center", 
+                 color="white" if cm[i, j] > thresh else "black")
+        
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+</code>
+
+<text>
+### 5.1 Base Models
+</text>
+
+<code>
+
+if (cat_col_flag & pca_flag  ):
+    base_pipe = Pipeline([
+                ('onehot',OneHotEncoder(handle_unknown='ignore')),
+                ('pca',TruncatedSVD()),
+                ('sscalar',  StandardScaler(with_mean=False)),
+              ])
+elif (cat_col_flag):
+    base_pipe = Pipeline([
+                ('onehot',OneHotEncoder(handle_unknown='ignore')),
+                ('sscalar',  StandardScaler(with_mean=False)),
+              ])
+else:
+    base_pipe = Pipeline([
+                ('sscalar',  StandardScaler(with_mean=False)),
+              ])
+
+
+print('base model is :')
+base_pipe
+</code>
+
+
+<code>
+# Dataframe for model leaderboard
+models = pd.DataFrame( columns = ['Model', 'Model_Definition', 'Score'])
+</code>
+
+
+<text>
+#### 5.1.1 Logistic Regression
+
+##### Training  
+</text>
+
+
+<code>
+
+model1 = LogisticRegression()
+model1_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('LogisticRegression', model1),
+              ])
+
+model1_pipe.fit(X_train, y_train)
+y_pred = model1_pipe.predict(X_valid)
+model1_pipe_measure = model_evaluate(model1_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+params = {
+        "LogisticRegression__C" : [  1, 0.1, 0.05,10, 100  ],
+        "LogisticRegression__max_iter" : [ 100, 500, 1000],
+        "LogisticRegression__multi_class" : ['auto'],
+           }
+
+model1_pipe_rs = RandomizedSearchCV( model1_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model1_pipe = model1_pipe_rs.fit(X_train, y_train)
+
+
+model1_def = best_model1_pipe.best_estimator_
+
+model1_measure =  model_evaluate(model1_def)
+
+models = models.append({'Model': 'LogisticRegression', 'Model_Definition': model1_def, 'Score': model1_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model1_pipe.best_params_
+
+</code>
+
+
+
+
+<text>
+#### 5.1.2 SupportVectorMachine (Nonlinear SVM using Polynomial kernal)
+
+##### Training  
+</text>
+
+
+<code>
+
+model2 = SVC( kernel="poly",probability=True)
+model2_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('SVC', model2),
+              ])
+
+model2_pipe.fit(X_train, y_train)
+y_pred = model2_pipe.predict(X_valid)
+model2_pipe_measure = model_evaluate(model2_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+params = {
+        "SVC__degree" : [  2,3  ],
+        "SVC__C" : [ 0.1, 1 , 10 ],
+        
+           }
+
+model2_pipe_rs = RandomizedSearchCV( model2_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model2_pipe = model2_pipe_rs.fit(X_train, y_train)
+
+
+model2_def = best_model2_pipe.best_estimator_
+
+model2_measure =  model_evaluate(model2_def)
+
+models = models.append({'Model': 'SVC', 'Model_Definition': model2_def, 'Score': model2_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model2_pipe.best_params_
+
+</code>
+
+
+
+<text>
+##### Ploting AUC (For Binary Classification)
+</text>
+
+<code>
+
+# this is for binary classification  only 
+y_pred = model2_def.predict(X_valid)
+if len(distinct_Y) == 2:
+    generate_auc(y_valid, y_pred, model_name="logistic regression")
+    
+    
+</code>
+
+
+<text>
+##### Ploting Confusion Matrix
+</text>
+
+<code>
+
+cnf_matrix = confusion_matrix(y_valid, y_pred)
+np.set_printoptions(precision=2)
+plt.figure(figsize=(8,8))
+plot_confusion_matrix(cnf_matrix, classes=distinct_Y, title='Confusion matrix Validation Set')
+plt.show()
+</code>
+
+
+
+<text>
+####  5.1.3 Naivebays -  BernoulliNB
+
+##### Training  
+</text>
+
+
+<code>
+
+model3 = BernoulliNB()
+
+model3_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('BernoulliNB', model3),
+              ])
+
+model3_pipe.fit(X_train, y_train)
+y_pred = model3_pipe.predict(X_valid)
+model3_pipe_measure = model_evaluate(model3_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+params = {
+        "BernoulliNB__alpha" : [ 0.1, 1, 2,3  ],
+
+        
+           }
+
+model3_pipe_rs = RandomizedSearchCV( model3_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model3_pipe = model3_pipe_rs.fit(X_train, y_train)
+
+
+model3_def = best_model3_pipe.best_estimator_
+
+model3_measure =  model_evaluate(model3_def)
+
+models = models.append({'Model': 'BernoulliNB', 'Model_Definition': model3_def, 'Score': model3_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model3_pipe.best_params_
+
+</code>
+
+
+ 
+
+
+
+
+<text>
+####  5.1.5  KNeighborsClassifier
+
+##### Training  
+</text>
+
+
+<code>
+
+model5 = KNeighborsClassifier()
+
+model5_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('KNeighborsClassifier', model5),
+              ])
+
+model5_pipe.fit(X_train, y_train)
+y_pred = model5_pipe.predict(X_valid)
+model5_pipe_measure = model_evaluate(model5_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+params = {
+        "KNeighborsClassifier__n_neighbors" : [  3, 5,9  ],
+
+        
+           }
+
+model5_pipe_rs = RandomizedSearchCV( model5_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model5_pipe = model5_pipe_rs.fit(X_train, y_train)
+
+
+model5_def = best_model5_pipe.best_estimator_
+
+model5_measure =  model_evaluate(model5_def)
+
+models = models.append({'Model': 'KNeighborsClassifier', 'Model_Definition': model5_def, 'Score': model5_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model5_pipe.best_params_
+
+</code>
+
+
+
+<text>
+##### Ploting AUC (For Binary Classification)
+</text>
+
+
+
+<text>
+#### 5.1.6  Base Models leaderboard
+We will take two top performing base model for our voting and stacking  model 
+</text>
+
+<code>
+base_models_df = models.sort_values(by='Score', ascending=False)
+base_models_df = base_models_df.set_index('Score')
+# selecting top two base model
+base_model1 = base_models_df.iloc[0]['Model_Definition']
+base_model2 = base_models_df.iloc[1]['Model_Definition']
+
+base_models_df.head(5)
+</code>
+
+
+
+<text>
+### 5.2 Bagging Models
+
+</text>
+
+
+<text>
+####  5.2.1  RandomForestClassifier
+
+##### Training  
+</text>
+
+
+<code>
+
+model6 = RandomForestClassifier()
+
+model6_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('RandomForestClassifier', model6),
+              ])
+
+model6_pipe.fit(X_train, y_train)
+y_pred = model6_pipe.predict(X_valid)
+model6_pipe_measure = model_evaluate(model6_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+ 
+
+
+params = {
+        "RandomForestClassifier__n_estimators": [100, 200, 400, 600   ],
+        "RandomForestClassifier__criterion" : ["entropy", "gini"],
+        "RandomForestClassifier__max_depth" : [  20, 40, 60],
+        "RandomForestClassifier__max_features" : [ .30, .50 , .70 ],    
+        "RandomForestClassifier__bootstrap" : [True, False]
+           }
+model6_pipe_rs = RandomizedSearchCV( model6_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model6_pipe = model6_pipe_rs.fit(X_train, y_train)
+
+
+model6_def = best_model6_pipe.best_estimator_
+
+model6_measure =  model_evaluate(model6_def)
+
+models = models.append({'Model': 'RandomForestClassifier', 'Model_Definition': model6_def, 'Score': model6_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model6_pipe.best_params_
+
+</code>
+
+
+
+
+
+<text>
+####  5.2.2  ExtraTreesClassifier
+
+##### Training  
+</text>
+
+
+<code>
+ 
+model7 = ExtraTreesClassifier()
+
+model7_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('ExtraTreesClassifier', model7),
+              ])
+
+model7_pipe.fit(X_train, y_train)
+y_pred = model7_pipe.predict(X_valid)
+model7_pipe_measure = model_evaluate(model7_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+ 
+
+
+params = {
+        "ExtraTreesClassifier__n_estimators": [100, 200, 500  ],
+        "ExtraTreesClassifier__max_depth" : [  20, 40, 60],
+        "ExtraTreesClassifier__max_features" : [ .30, .50 , .70 ],    
+           }
+model7_pipe_rs = RandomizedSearchCV( model7_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model7_pipe = model7_pipe_rs.fit(X_train, y_train)
+
+
+model7_def = best_model7_pipe.best_estimator_
+
+model7_measure =  model_evaluate(model7_def)
+
+models = models.append({'Model': 'ExtraTreesClassifier', 'Model_Definition': model7_def, 'Score': model7_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model7_pipe.best_params_
+
+</code>
+
+
+ 
+
+<text>
+
+#### Select top bagging model for our stacking & voting regressor
+</text>
+
+<code>
+if (model6_measure > model7_measure):
+    bagging_model = model6_def
+else :
+    bagging_model = model7_def
+
+</code>
+
+
+
+<text>
+### 5.3 Boosting  Models
+
+</text>
+<text>
+####  5.3.1  XGBClassifier
+
+##### Training  
+</text>
+
+
+<code>
+
+model8 = XGBClassifier()
+
+model8_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('XGBClassifier', model8),
+              ])
+
+model8_pipe.fit(X_train, y_train)
+y_pred = model8_pipe.predict(X_valid)
+model8_pipe_measure = model_evaluate(model8_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+ 
+
+
+params = {
+        "XGBClassifier__learning_rate": [ 0.1, 0.01,1  ],
+        "XGBClassifier__n_estimators" : [  30, 100, 500],
+        "XGBClassifier__max_depth" : [  20, 40 ],    
+           }
+model8_pipe_rs = RandomizedSearchCV( model8_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model8_pipe = model8_pipe_rs.fit(X_train, y_train)
+
+
+model8_def = best_model8_pipe.best_estimator_
+
+model8_measure =  model_evaluate(model8_def)
+
+models = models.append({'Model': 'XGBClassifier', 'Model_Definition': model8_def, 'Score': model8_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model8_pipe.best_params_
+
+</code>
+
+
+<text>
+####  5.3.2  LGBMClassifier
+
+##### Training  
+</text>
+
+
+<code>
+
+model9 = LGBMClassifier()
+
+model9_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('LGBMClassifier', model9),
+              ])
+
+model9_pipe.fit(X_train, y_train)
+y_pred = model9_pipe.predict(X_valid)
+model9_pipe_measure = model_evaluate(model9_pipe)
+</code>
+
+
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+ 
+
+
+params = {
+        "LGBMClassifier__learning_rate": [ 0.1, 0.01,1  ],
+        "LGBMClassifier__n_estimators" : [ 30, 100, 500],
+        "LGBMClassifier__max_depth" : [  20, 40 ],    
+           }
+model9_pipe_rs = RandomizedSearchCV( model9_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model9_pipe = model9_pipe_rs.fit(X_train, y_train)
+
+
+model9_def = best_model9_pipe.best_estimator_
+
+model9_measure =  model_evaluate(model9_def)
+
+models = models.append({'Model': 'LGBMClassifier', 'Model_Definition': model9_def, 'Score': model9_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model9_pipe.best_params_
+
+</code>
+
+
+
+<text>
+####  5.3.3  AdaBoostClassifier
+
+##### Training  
+</text>
+
+
+<code>
+
+model10 = AdaBoostClassifier()
+
+model10_pipe = Pipeline([
+                 ('base' , base_pipe),
+                ('AdaBoostClassifier', model10),
+              ])
+
+model10_pipe.fit(X_train, y_train)
+y_pred = model10_pipe.predict(X_valid)
+model10_pipe_measure = model_evaluate(model10_pipe)
+</code>
+
+<text>
+##### Hyperparameter tuning using RandomSearchCV
+</text>
+
+<code>
+ 
+
+
+params = {
+        "AdaBoostClassifier__learning_rate": [ 0.1, 0.01,1  ],
+        "AdaBoostClassifier__n_estimators" : [ 30, 100, 500],
+        "AdaBoostClassifier__algorithm" : [ 'SAMME.R','SAMME' ],    
+           }
+model10_pipe_rs = RandomizedSearchCV( model10_pipe, params, random_state=21, cv=3, verbose=0, n_jobs=-1, scoring=metric)
+best_model10_pipe = model10_pipe_rs.fit(X_train, y_train)
+
+
+model10_def = best_model10_pipe.best_estimator_
+
+model10_measure =  model_evaluate(model10_def)
+
+models = models.append({'Model': 'AdaBoostClassifier', 'Model_Definition': model10_def, 'Score': model10_measure},
+                       ignore_index=True)
+
+print('\n'+"Model parameters after parameter tuning")
+best_model10_pipe.best_params_
+
+</code>
+
+
+<code>
+ 
+if ( max(model10_measure,model9_measure,model8_measure) == model8_measure):
+    boosting_model = model8_def
+    
+elif( max(model10_measure,model9_measure,model8_measure) == model9_measure):
+    boosting_model = model9_def
+    
+else :
+    boosting_model = model10_def
+ 
+</code>
+
+
+
+<text>
+
+### 5.4 Model Leaderboard
+
+</text>
+
+<code>
+
+models_df = models.sort_values(by='Score', ascending=False)
+models_df = models_df.set_index('Score')
+models_df.head(10)
+
+</code>
+
+
+<text>
+## 6. Advance Modeling     
+For our Advance Modeling, we will take 4 models two from base and one each from bagging and boosting model
+</text>
+
+
+
+
+
+<text>
+
+#### 6.1 Voting  (Averaging)
+
+</text>
+
+<code>
+
+model11 = VotingClassifier(
+    estimators=[('base_model1',base_model1),('base_model2',base_model2), ('bagging_model', bagging_model),('boosting_model',boosting_model)],
+    voting = 'hard' )
+
+model11.fit(X_train,y_train)
+y_pred = model11.predict(X_valid)
+model11_measure = model_evaluate(model11)
+# adding into our model list
+models = models.append({ 'Model': "Voting Classifier(Averaging)", 
+                         'Model_Definition': model11,'Score': model11_measure},ignore_index=True)
+
+</code>
+
+
+
+
+ 
+
+<text>
+
+#### 6.2 Voting ( Weighted Averaging)
+
+</text>
+
+<code>
+
+model12 = VotingClassifier(
+    estimators=[('base_model1',base_model1),('base_model2',base_model2), ('bagging_model', bagging_model),('boosting_model',boosting_model)],
+    voting = 'soft' )
+
+model12.fit(X_train,y_train)
+y_pred = model12.predict(X_valid)
+model12_measure = model_evaluate(model12)
+# adding into our model list
+models = models.append({ 'Model': "Voting Classifier(Weighted Averaging)", 
+                         'Model_Definition': model12, 'Score': model11_measure}, ignore_index=True )
+
+</code>
+
+ 
+
+<text>
+
+#### 6.3 Stacking Model
+</text>
+
+<code>
+
+
+lr = LogisticRegression() 
+
+
+model13 = StackingCVClassifier(classifiers=[base_model1,bagging_model,boosting_model],
+                            use_probas=True,
+                            meta_classifier=lr)
+                            
+                            
+X_train_matrix = X_train.as_matrix()
+y_train_matrix = y_train.as_matrix()
+
+
+
+model13.fit(X_train_matrix,y_train_matrix)
+train_df_matrix = train_df.as_matrix()
+
+mesure = cross_val_score(model13,train_df_matrix, y, cv=3, scoring= metric )
+
+model13_measure = mesure.mean()
+print("3 Fold Cross-Validation measure is : " +str(model13_measure))
+
+models = models.append([{ 'Model': "StackingModel", 'Model_Definition': model13, 'Score': model13_measure }])
+</code>
+
+
+
+ 
+
+
+ 
+ 
+
+
+<text>
+### 6.4 Final Model Leaderboard
+</text>
+
+<code>
+models_df = models.sort_values(by='Score', ascending=False)
+models_df = models_df.set_index('Score')
+models_df.head(13)
+</code>
+
+
+
+<text>
+## 7. Submission File
+Preparing submission file for the best model
+</text>
+
+<code>
+
+# best model from all model
+tuned_best_model_def = models_df.iloc[0]['Model_Definition']
+# prediction
+pred = tuned_best_model_def.predict(test_df)
+ 
+
+sub = pd.DataFrame()
+sub[_id] = test_id
+sub[target] = pred
+sub.to_csv("baseline_solution.csv", index=False)
+print ("Submission File Generated, here is the snapshot: ")
+print (sub.head(10))
+</code>
+

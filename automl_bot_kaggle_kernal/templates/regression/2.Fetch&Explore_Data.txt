@@ -1,0 +1,128 @@
+<text>
+## 2. Read & Explore Data
+
+### 2.1 Fetch Data 
+</text>
+
+<code>
+## fetch dataset
+
+# have to edit and optimize this code
+competition = "<_COMPETITION>"
+if (competition !=''):
+    kaggle_folder = competition
+else :
+    kaggle_folder = "<_FOLDER>"
+
+
+train_path = "../input/"+kaggle_folder+"/<_TRAIN_FILE>.csv"
+test_path = "../input/"+kaggle_folder+"/<_TEST_FILE>.csv"
+
+train_df = pd.read_csv(train_path)
+
+train_copy = train_df.copy()
+
+
+test_df = pd.DataFrame()
+if os.path.exists(test_path):
+    test_df = pd.read_csv(test_path)
+
+	
+
+print (" ... dataset fetched")
+</code>
+
+<text>
+### 2.2 Dataset Extract 
+</text>
+
+<code>
+## dataset extract
+train_df.head()
+</code>
+
+ 
+
+
+<text>
+### 2.3 Dataset Summary  
+</text>
+
+<code>
+## dataset  summary
+train_df.describe()
+</code>
+
+
+
+<code>
+## find categorical columns in the dataset 
+num_cols = train_df._get_numeric_data().columns
+cat_cols = list(set(train_df.columns) - set(num_cols))
+
+print ("There are " + str(len(num_cols)) + " numerical columns in the dataset (including one target column)")
+print ("There are " + str(len(cat_cols)) + " object type columns in the dataset")
+
+</code>
+
+<text>
+### 2.4 Dataset Shape
+</text>
+ 
+<code>
+# dataset shape
+print (f'Shape of training data :{train_df.shape}')
+print (f'Shape of testing data: {test_df.shape}')
+</code> 
+
+
+<text>
+### 2.5 Missing Features count 
+</text>
+
+<code>
+nulls = pd.DataFrame(train_df.isnull().sum().sort_values(ascending=True), columns = ['Null_Counts'])
+nulls_filtered = nulls[nulls['Null_Counts'] > 0]
+if(nulls_filtered.shape[0] < 1):
+    missing_flag = False
+    print("There are no missing values in dataset ")
+else:
+    missing_flag = True
+    missing_cols =  nulls_filtered.index
+    numeric_missing_cols =  np.intersect1d(num_cols,missing_cols )
+    categorical_missing_cols = np.intersect1d( cat_cols ,missing_cols )
+    print (f' Total number of columns missing : { nulls_filtered.shape[0] }')
+    print (f' Number of numerical columns missing : {len(numeric_missing_cols)} ')
+    print (f' Number of objects columns missing : {len(categorical_missing_cols)} ')
+</code> 
+
+
+<text>
+### 2.6 Segregate Features & Target 
+</text>
+
+
+<code>
+## segregate features and target
+target = "<_TARGET_COL>"
+y = train_df[target]
+distinct_Y = y.value_counts().index
+
+##  we will remove id from feature set
+
+_id = "<_ID_COL>"
+
+if _id == "": ## if id is not present, create a dummy 
+    _id = 'id'
+    train_df[_id] = 1
+    test_df[_id] = 1
+if _id not in list(test_df.columns):
+    test_df[_id] = 1   
+
+## drop the id columns : we will remove target at end 
+test_id = test_df[_id]
+train_df = train_df.drop([_id], axis=1)
+test_df = test_df.drop([_id], axis=1)
+
+</code>
+

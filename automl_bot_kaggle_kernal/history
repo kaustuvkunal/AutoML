@@ -1,0 +1,17 @@
+config = {
+			"_COMPETITION" : "learn-together",
+            "_TARGET_COL" : "Cover_Type",
+            "_ID_COL" : "Id",
+            "_NAME": "ForestClassifier",
+            "_METRIC" : "accuracy",
+		   "_TYPE" : "classification"
+              }
+
+config = {
+			"_COMPETITION" : "titanic",
+            "_TARGET_COL" : "Survived",
+            "_ID_COL" : "PassengerId",
+            "_NAME": "Titanic",
+            "_METRIC" : "accuracy",
+		   "_TYPE" : "classification"
+              }

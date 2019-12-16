@@ -1,0 +1,157 @@
+<text>
+## 2.  Fetch & Explore Data
+
+
+### 2.1  Fetch data &  separate features & target
+</text>
+
+<code>
+## fetch dataset
+train_path = "<_DATASET_FOLDER_PATH><_TRAIN_FILE>.csv"
+train_df = pd.read_csv(train_path)
+train_copy = train_df.copy()
+
+test_path = "<_DATASET_FOLDER_PATH><_TEST_FILE>.csv"
+test_df = pd.DataFrame()
+if os.path.exists(test_path):
+    test_df = pd.read_csv(test_path)
+
+print (" ... dataset fetched")
+</code>
+
+<code>
+## segregate feature and target
+target = "<_TARGET_COL>"
+y = train_df[target]
+distinct_Y = y.value_counts().index
+
+##  we will remove id & target columns from feature set
+tobe_deleted_cols = [target]
+_id = "<_ID_COL>"
+if _id == "": ## if id is not present, create a dummy 
+    _id = "id"
+    train_df[_id] = 1
+    test_df[_id] = 1
+if _id not in list(test_df.columns):
+    test_df[_id] = 1   
+    
+tobe_deleted_cols.append(_id)
+    
+    
+## drop the target and id columns
+
+test_id = test_df[_id]
+train_df = train_df.drop(tobe_deleted_cols, axis=1)
+test_df = test_df.drop([_id], axis=1)
+
+</code>
+
+
+<text>
+
+### 2.2 Dataset Extract, Summary & Shape
+Lets explore dataset
+
+</text>
+
+<code>
+##  dataset extract
+train_df.head()
+</code>
+
+
+<code>
+## dataset  summary
+train_df.describe()
+</code> 
+
+<code>
+# dataset shape
+print (f'Shape of training data :{train_df.shape}')
+print (f'Shape of testing data: {test_df.shape}')
+</code> 
+
+
+<text>
+### 2.3 Target Variable Distribution 
+ 
+</text>
+
+<code>
+tar_dist = dict(Counter(y.values))
+
+xx = list(tar_dist.keys())
+yy = list(tar_dist.values())
+
+plt.figure(figsize=(5,3))
+sns.set(style="whitegrid")
+ax = sns.barplot(x=xx, y=yy, palette="rocket")
+ax.set_title('Distribution of Target')
+ax.set_ylabel('count');
+ax.set_xlabel(target);
+</code>
+
+<text>
+### 2.4 Missing Value Counts 
+
+Lets check the count of missing values in the datasets 
+</text>
+
+<code>
+mcount = train_df.isna().sum() 
+xx = mcount.index 
+yy = mcount.values
+
+missing_cols = 0
+for each in yy:
+    if each > 0:
+        missing_cols += 1
+print ("No of columns having missing values :  " + str(missing_cols)  )
+
+if missing_cols > 0:
+    plt.figure(figsize=(12,5))
+    sns.set(style="whitegrid")
+    ax = sns.barplot(x=xx, y=yy, palette="gist_rainbow")
+    ax.set_title('Number of Missing Values')
+    ax.set_ylabel('Number of Columns');
+</code>
+ 
+
+<text>
+### 2.5 Variable Types
+
+Lets count the number of numerical and categorical columns in the dataset
+</text>
+
+
+<code>
+## find categorical columns in the dataset 
+num_cols = train_df._get_numeric_data().columns
+cat_cols = list(set(train_df.columns) - set(num_cols))
+
+print ("There are " + str(len(num_cols)) + " numerical columns in the dataset")
+print ("There are " + str(len(cat_cols)) + " object type columns in the dataset")
+</code>
+
+
+<text>
+### 2.6 Variable Correlations (Only Numerical Fields)
+
+Lets plot the correlations among the variables. The generated graph can give an idea about features which are highly, moderately or least correlated with one another.  
+</text>
+
+
+<code>
+get_corr = False
+corr = train_df.corr()
+if len(corr) > 0:
+    get_corr = True
+    colormap = plt.cm.BrBG
+    plt.figure(figsize=(10,10));
+    plt.title('Pearson Correlation of Features', y=1.05, size=15);
+    sns.heatmap(corr, linewidths=0.1,vmax=1.0, square=True, cmap=colormap, linecolor='white', annot=True);
+else:
+    print ("No variables available for correlation")
+</code>
+
+ 

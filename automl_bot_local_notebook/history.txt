@@ -1,0 +1,130 @@
+config =  {"_TRAIN_FILE": "train",
+		   "_TEST_FILE": "test",
+		   "_DATASET_FOLDER_PATH": "/Users/kaustuv/DataScience/DS_projects/Kaggle/cat-in-the-dat/cat-in-the-dat/",
+		   "_TARGET_COL": "target",
+		   "_ID_COL":"id",
+		   "_METRIC" : "roc_auc",
+		   "_TYPE" : "classification"
+
+		   }
+
+
+*********
+
+Regression1
+
+config =  {"_TRAIN_FILE": "train",
+		   "_TEST_FILE": "test",
+		   "_DATASET_FOLDER_PATH": "/Users/kaustuv/DataScience/DS_projects/Kaggle/HousePrice/datasets/",
+		   "_TARGET_COL": "SalePrice",
+		   "_ID_COL":"Id",
+		   "_METRIC" : "neg_mean_squared_error",
+		   "_TYPE" : "regression"
+		   }
+
+
+
+**********************
+Regression 2
+
+config =  {"_TRAIN_FILE": "train",
+		   "_TEST_FILE": "test",
+		   "_EXT": "csv",
+		   "_DATASET_FOLDER_PATH": "/Users/kaustuv/DataScience/DS_projects/Kaggle/RestaurantRevenuePrediction/datasets/",
+		   "_TARGET_COL": "revenue",
+		   "_ID_COL":"Id",
+		   "_METRIC" : "neg_mean_squared_error",
+		   "_TYPE" : "regression"
+		   }
+
+************************
+
+Regression 3
+
+config =  {"_TRAIN_FILE": "train",
+		   "_TEST_FILE": "test",
+		   "_EXT": "csv",
+		   "_DATASET_FOLDER_PATH": "/Users/kaustuv/DataScience/DS_projects/Kaggle/bikesharing/datasets/",
+		   "_TARGET_COL": "count",
+		   "_ID_COL":"datetime",
+		   "_METRIC" : "neg_mean_squared_log_error",
+		   "_TYPE" : "regression"
+		   }
+
+
+
+
+********************************
+
+Regression 4
+
+config =  {"_TRAIN_FILE": "train",
+		   "_TEST_FILE": "test",
+		   "_EXT": "csv",
+		   "_DATASET_FOLDER_PATH": "/Users/kaustuv/DataScience/DS_projects/AnalyticVidhya/Reg_BigMartSales/datasets/",
+		   "_TARGET_COL": "Item_Outlet_Sales",
+		   "_ID_COL":"Item_Identifier",
+		   "_METRIC" : "neg_mean_squared_error",
+		   "_TYPE" : "regression"
+		   }
+
+
+********************
+Regression 5
+
+
+config =  {"_TRAIN_FILE": "train",
+		   "_TEST_FILE": "test",
+		   "_EXT": "csv",
+		   "_DATASET_FOLDER_PATH": "/Users/kaustuv/DataScience/DS_projects/AnalyticVidhya/Reg_NumberOfUpvotes/datasets/",
+		   "_TARGET_COL": "Upvotes",
+		   "_ID_COL":"ID",
+		   "_METRIC" : "neg_mean_squared_error",
+		   "_TYPE" : "regression"
+		   }
+
+
+
+cheatsheet
+
+Regression
+‘explained_variance’ 	metrics.explained_variance_score
+‘max_error’ 	metrics.max_error
+‘neg_mean_absolute_error’ 	metrics.mean_absolute_error
+‘neg_mean_squared_error’ 	metrics.mean_squared_error
+‘neg_mean_squared_log_error’ 	metrics.mean_squared_log_error
+‘neg_median_absolute_error’ 	metrics.median_absolute_error
+‘r2’ 	metrics.r2_score
+
+
+Classification
+‘accuracy’ 	metrics.accuracy_score
+‘balanced_accuracy’ 	metrics.balanced_accuracy_score
+‘average_precision’ 	metrics.average_precision_score
+‘brier_score_loss’ 	metrics.brier_score_loss
+‘f1’ 	metrics.f1_score 	for binary targets
+‘f1_micro’ 	metrics.f1_score 	micro-averaged
+‘f1_macro’ 	metrics.f1_score 	macro-averaged
+‘f1_weighted’ 	metrics.f1_score 	weighted average
+‘f1_samples’ 	metrics.f1_score 	by multilabel sample
+‘neg_log_loss’ 	metrics.log_loss 	requires predict_proba support
+‘precision’ etc. 	metrics.precision_score 	suffixes apply as with ‘f1’
+‘recall’ etc. 	metrics.recall_score 	suffixes apply as with ‘f1’
+‘jaccard’ etc. 	metrics.jaccard_score 	suffixes apply as with ‘f1’
+‘roc_auc’ 	metrics.roc_auc_score
+
+
+
+### Titanic
+
+config =  {"_TRAIN_FILE": "train",
+		   "_TEST_FILE": "test",
+		   "_DATASET_FOLDER_PATH": "/Users/kaustuv/DataScience/DS_projects/Kaggle/TitanicProblem/datasets/",
+		   "_TARGET_COL": "Survived",
+		   "_ID_COL":"PassengerId",
+		   "_METRIC" : "accuracy",
+		   "_TYPE" : "classification"
+		   }
+
+
+*****************************************

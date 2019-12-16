@@ -1,0 +1,81 @@
+<text>
+## 3. Data Visualisation 
+</text>
+
+<text>
+### 3.1 Target Distribution
+</text>
+
+<code>
+
+train_df[target].hist(bins = 100, figsize = (10,10),density=True)
+</code>
+
+
+<text>
+### 3.2  Correlation-Matrix Plot (For Numeric Features)
+</text>
+
+
+<code>
+# most correlated features
+get_corr = False
+corr = train_copy.corr()
+if len(corr) > 0:
+    get_corr = True
+    top_corr_features = corr.index[abs(corr[target])>0.4]
+    plt.figure(figsize=(10,10))
+    g = sns.heatmap(train_copy[top_corr_features].corr(),annot=True,cmap="RdYlGn")
+
+else:
+    print ("No numeric variables for correlation plot")
+    
+</code>
+
+
+<text>
+### 3.3 Category Distribution (For Categorical Features)
+Lets see how many category each categorical variable has 
+</text>
+
+<code>
+# no of categories in categorical feature
+col_list = train_df.select_dtypes(include='object').columns
+cat_df = pd.DataFrame(columns= ["Feature","Category_Count"])
+category_flag = False
+if(len(col_list)!=0):
+    category_flag= True
+    cat_df = pd.DataFrame(columns= ["Feature","Category_Count"])
+    for i in col_list: 
+        n =  train_df[i].nunique()
+        cat_df = cat_df.append({'Features': i, 'Category_Count': n }, ignore_index=True)
+        cat_df.sort_values("Category_Count", axis = 0, ascending = True, inplace = True, na_position ='last')
+    size = max(10, cat_df.shape[0])
+    cat_df.plot(kind='barh',y='Category_Count', x ='Features', title = " No of Categories",color = ['g','y','b' ],stacked=True,legend= False,
+                figsize=(size/2,size/2))
+else:
+    
+    print ("No categorical variables in the dataset")
+                     
+</code>
+
+
+<text>
+### 3.4 Missing Values Distribution  
+</text>
+
+<code>
+if (missing_flag) :
+    row_count = train_df.shape[0]
+    nulls_filtered['Null_percent'] = nulls_filtered['Null_Counts']/row_count
+    nulls_filtered.plot(kind='barh',y='Null_percent',title = "Missing features percentage",
+                    color = ['g','y','r' ],stacked=True,legend= False)
+    print (f' Total No of missing columns: { nulls_filtered.shape[0] }')
+    print (f' No of numerical columns missing: {len(numeric_missing_cols)} ')
+    print (f' No of objects columns missing: {len(categorical_missing_cols)} ')
+else:
+    print("There are no missing values in dataset")
+ 
+</code>
+
+

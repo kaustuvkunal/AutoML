@@ -1,0 +1,243 @@
+<text>
+##  4. Data Prepration & Cleaning 
+</text>
+
+<text>
+### 4.1 Dropping Additional Features
+</text>
+
+<code>
+# dropping additional training set features (if any) wrt to test set
+if (train_df.shape[1]-test_df.shape[1] >1):
+    uncommon_feature = set(train_df.columns)- set(test_df.columns)
+    uncommon_feature.remove(target)
+    print(f'Dropping additional features: {uncommon_feature}')
+    train_df.drop((list(uncommon_feature)), axis = 1 ,inplace = True)
+else :
+    print('No additional features to drop')
+</code>
+
+
+
+<text>
+### 4.2 Dropping Less Correlated Numeric Features
+
+Lets Remove less co-related numerical features
+
+- threshhold_no_of_feature = 10 
+- threshhold_corr_value = 0.4
+- We will keep more than 'threshhold_no_of_feature' only if feature has correlation value larger than 
+'threshhold_corr_value'
+- Note: if you feel above value are not good enough for your dataset, reset this value and rerun the notebook
+
+</text>
+
+
+<code>
+
+
+#droping less co-related numerical features
+if(get_corr):
+    threshhold_no_of_feature = 10 
+    threshhold_corr_value = 0.4
+    corr_matrix =  corr.abs()    
+    cm = pd.DataFrame(corr_matrix[target].sort_values(ascending=True) )
+    cm['Features'] =cm.index
+    cm = cm.reset_index()
+    least_num_cor_feature = []
+    for index, row in cm.iterrows():
+        if index > threshhold_no_of_feature and row[target] < threshhold_corr_value :
+            least_num_cor_feature.append(row["Features"])
+    # drop the lesser corelated fetures from dataset 
+    print (f'Shape of training data :{train_df.shape}')
+    print (f'Shape of training data :{test_df.shape}')
+    try:
+        test_df =  test_df.drop((least_num_cor_feature), axis = 1)
+        train_df = train_df.drop((least_num_cor_feature), axis = 1)
+    except:
+        pass
+    print (f'Shape of training data after less correlated Numerical features removal  :{train_df.shape}')
+    print (f'Shape of testing data after less correlated Numerical features removal :{test_df.shape}')
+else:
+    print ("No numeric variables for correlation") 
+       
+</code>
+
+
+
+<text>
+
+### 4.2 Missing Values Treatment  
+
+Rule for missing values treatment: 
+
+For categorical variables: 
+    - if missing percentage < 20% --> replace by mode
+    - else -> add new category as missing
+
+For continuous variables: 
+    - if missing percentage > 20% --> remove feature column
+    - else --> replace by mean
+ 
+
+</text>
+
+<code>
+if (missing_flag):
+    #Remove features if missing percentage > 20
+    numeric_missing_cols = np.array(list(set(numeric_missing_cols)- set(least_num_cor_feature) )) 
+    
+    high_missings_cols = (nulls_filtered[nulls_filtered['Null_percent'] > 0.2]).index   
+    high_missings_numeric_cols = np.intersect1d(numeric_missing_cols,high_missings_cols )
+    high_missings_categorical_cols = np.intersect1d(categorical_missing_cols,high_missings_cols )    
+    lesser_missings_numeric_cols = np.setxor1d(numeric_missing_cols,high_missings_numeric_cols)   
+    lesser_missings_categorical_cols= np.setxor1d(categorical_missing_cols,high_missings_categorical_cols )
+    
+    print ('Droping numeric features with missing percentage > 20%...')
+    test_df =  test_df.drop((high_missings_numeric_cols), axis = 1)
+    train_df = train_df.drop((high_missings_numeric_cols), axis = 1)
+    print("Rest numerical columns, replacing the missing values by mean...")
+    test_df[lesser_missings_numeric_cols] = test_df[lesser_missings_numeric_cols
+                                                   ].fillna(test_df[lesser_missings_numeric_cols].mean())
+    train_df[lesser_missings_numeric_cols] = train_df[lesser_missings_numeric_cols
+                                                     ].fillna(train_df[lesser_missings_numeric_cols].mean())
+    print ('Adding new category for categorical features with missing percentage > 20%...')
+    train_df[high_missings_categorical_cols] = train_df[high_missings_categorical_cols].fillna('MISSING')
+    test_df[high_missings_categorical_cols] =  test_df[high_missings_categorical_cols].fillna('MISSING')
+    print ('Rest missing categorical features replacing by mode...')
+    test_df[lesser_missings_categorical_cols] = test_df[lesser_missings_categorical_cols].fillna(test_df[lesser_missings_categorical_cols].mode().iloc[0])
+    train_df[lesser_missings_categorical_cols] = train_df[lesser_missings_categorical_cols].fillna(train_df[lesser_missings_categorical_cols].mode().iloc[0])
+    print (f'Shape of training data after less correlated Numerical features removal  :{train_df.shape}')
+    print (f'Shape of testing data after less correlated Numerical features removal :{test_df.shape}')
+else:
+    print("There are no missing values in dataset")
+
+ 
+</code>
+ 
+
+
+<text>
+#### Any more missing in test set
+
+</text>
+
+ 
+
+ 
+
+<code>
+if (missing_flag):
+    # We have removed  mssing data from train set if test set has any missing items we will do again for test 
+    test_num_cols = test_df._get_numeric_data().columns
+    test_cat_cols = list(set(test_df.columns) - set(num_cols))
+    test_row_count = test_df.shape[0]
+    
+    test_nulls = pd.DataFrame(test_df.isnull().sum().sort_values(ascending=True), columns = ['Null_Counts'])
+    test_nulls_filtered = test_nulls[test_nulls['Null_Counts'] > 0]
+    test_missing_cols =  test_nulls_filtered.index
+    
+    test_numeric_missing_cols =  np.intersect1d(test_num_cols,test_missing_cols )
+    test_categorical_missing_cols = np.intersect1d( test_cat_cols ,test_missing_cols )
+    # numeric by mean, objects by mode  
+    test_df[test_numeric_missing_cols] = test_df[test_numeric_missing_cols].fillna(test_df[test_numeric_missing_cols].mean())
+    test_df[test_categorical_missing_cols]=test_df[test_categorical_missing_cols].fillna(test_df.mode().iloc[0])
+else:
+    print("Skipping .. as there are no missing value")
+ 
+</code>
+
+<code>
+print (f'Shape of training data after missing value treatment  :{train_df.shape}')
+print (f'Shape of testing data after missing value treatment :{test_df.shape}')
+</code>
+
+<text>
+### 4.3 Target Skewness Transform
+
+Transform target to minimize the skewness
+
+</text>
+
+<code>
+
+target_skew = np.absolute(train_copy[target].skew()) 
+target_log_skew =np.absolute( np.log(train_copy[target]).skew())
+target_sqrt_skew =np.absolute( np.sqrt(train_copy[target]).skew())
+target_square_skew = np.absolute((train_copy[target]**2).skew())
+skew_transform = 'normal'
+
+m = min(target_skew,target_log_skew,target_sqrt_skew,target_square_skew)
+
+if m == target_log_skew :
+    y = np.log(train_copy[target])
+    skew_transform = 'log'
+elif m == target_sqrt_skew :
+    y =  np.sqrt(train_copy[target])
+    skew_transform = 'sqrt'
+                
+elif m == target_square_skew :
+    y = train_copy[target]**2
+    skew_transform = 'square'
+    
+print ( " target Skewness feature transform is "+skew_transform)
+
+</code>
+
+
+
+
+<text>
+### 4.4  Categorical  Flag setup for one-hot-encoding  and PCA
+
+We will prefer one-hot encoding but if any feature has many categories then we will enable PCA  before one hot encoding
+
+</text>
+
+<code>
+cat_col_flag = False
+pca_flag = False
+if(category_flag): 
+    threshhold_no_of_feature = 50 
+    max_cat_count= cat_df.iloc[-1]['Category_Count']
+    #also take care of condition when no object feature 
+    if (max_cat_count > threshhold_no_of_feature):
+        pca_flag = True
+    # category column flag    
+    cat_col =  len(train_df.select_dtypes(include=object).columns)
+    if (cat_col >0):
+        cat_col_flag = True
+    else:
+        cat_col_flag = False
+else:   
+    print ("Skipping .. as no categorical variables in the dataset")
+
+print (f'One-hot-encdoing flag : {cat_col_flag}') 
+print (f'PCA flag : {pca_flag}') 
+
+</code>
+
+
+
+
+
+
+
+<text>
+### 4.5 Train Test Split
+
+</text>
+
+
+<code>
+
+train_df = train_df.drop([target], axis=1)
+
+X_train, X_valid, y_train, y_valid = train_test_split(train_df, y, test_size=0.20, random_state=2019)
+
+</code>
+
+
+
+
+ 
