@@ -57,7 +57,8 @@ Update your  kaggle id under id (in line 17) of kaggle_bot.py and provide/update
              
 
 3.  <B>automl_bot_google_colab : </B> Autogenerates google colab notebook
-  Usage instruction :todo
+  
+  Usage instruction : tobedone
 
 
 
