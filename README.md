@@ -1,5 +1,5 @@
 # AutoML
-Bots to Auto generate Baseline DataScience Model Notebook
+Bots to Auto generate Notebook for Baseline DataScience Model 
 
 ## Introduction 
 The phases of Data Science modeling process is largely fixed. 
@@ -20,12 +20,12 @@ Our bot auto generates notebook code for these phases for provided problem data 
 - Provides Model-Leaderboard for model evaluation 
 - Covers wide range of Models ( trains data  on total 13 model that includes  5 base models,  2 bagging models, 3 boosting models,  2 voting and  1 stacking model). 
 - Automates all generic steps hence saves Time  
-- Gives an idea of which model to choose for model
+- Guide in further modeling decisions
 - 
 
 ## Project Modules 
 
-1.  automl_bot_local_notebook : AutoGenerate jupyter notebook on local machine
+1. <B> automl_bot_local_notebook :</B> AutoGenerate jupyter notebook on local machine
 
 Usage Instruction : Provide/update following configuration parameter inside automl_bot_local_notebook/runconfig.py and execute
 
@@ -39,7 +39,7 @@ _TARGET_COL" ->  Name of target feature to be predicted
 "_TYPE"  -> Learning type either regression  or classification
 		  
 
-2.  automl_bot_kaggle_kernel : Autogenerates kaggle kernel 
+2.  <B>automl_bot_kaggle_kernel :</B> Autogenerates kaggle kernel 
 
 Usage Instruction : 
 
@@ -57,7 +57,7 @@ Update your  kaggle id under id (in line 17) of kaggle_bot.py and provide/update
 
              
 
-3.  automl_bot_google_colab : Autogenerates google colab notebook
+3.  <B>automl_bot_google_colab : </B> Autogenerates google colab notebook
  
   Usage instruction 
 
