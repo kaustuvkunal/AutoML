@@ -28,14 +28,14 @@ Our bot auto generates notebook code for these phases for provided problem data 
 
 Usage Instruction : Provide/update following configuration parameter inside automl_bot_local_notebook/runconfig.py and execute
 
-"_TRAIN_FILE" ->  Name of training dataset file
-"_TEST_FILE" ->  Name of test dataset file
-"_EXT" -> Dataset file type extension, currently supports csv and xlsx 
-_DATASET_FOLDER_PATH" -> Absolute path of folder where test and train files are present
-_TARGET_COL" ->  Name of target feature to be predicted
-"_ID_COL" ->  Nmae of unique id column or column which will exist inside final submission file 
-"_METRIC" ->  evaluation metric name (as per sklearn library)
-"_TYPE"  -> Learning type either regression  or classification
+- "_TRAIN_FILE" ->  Name of training dataset file
+- "_TEST_FILE" ->  Name of test dataset file
+- "_EXT" -> Dataset file type extension, currently supports csv and xlsx 
+- "_DATASET_FOLDER_PATH" -> Absolute path of folder where test and train files are present
+- "_TARGET_COL" ->  Name of target feature to be predicted
+- "_ID_COL" ->  Nmae of unique id column or column which will exist inside final submission file 
+- "_METRIC" ->  evaluation metric name (as per sklearn library)
+- "_TYPE"  -> Learning type either regression  or classification
 		  
 
 2.  <B>automl_bot_kaggle_kernel :</B> Autogenerates kaggle kernel 
